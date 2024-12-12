@@ -20,7 +20,7 @@
                 {% for ext_snap in instance.external_snapshots %}
                     <tr>
                         <td><a class="link-primary" href="{% url 'overview' compute.id %}">{{ compute.name }}</a></td>
-                        <td><a class="link-primary" href="{% url 'instances:instance' instance.id %}">{{ instance.name }}</a></td>
+                        <td class="text-truncate" style="max-width: 230px;"><a class="link-primary" href="{% url 'instances:instance' instance.id %}">{{ instance.name }}</a></td>
                         <td>{{ ext_snap.date|date:"M d H:i:s" }}</td>
                         <td><strong>{{ ext_snap.name }}</strong></td>
                         <td>({% trans "External" %}) - {{ ext_snap.description }}</td>
@@ -48,7 +48,7 @@
                 {% for snap in instance.snapshots %}
                     <tr>
                         <td><a class="link-primary" href="{% url 'overview' compute.id %}">{{ compute.name }}</a></td>
-                        <td><a class="link-primary" href="{% url 'instances:instance' instance.id %}">{{ instance.name }}</a></td>
+                        <td class="text-truncate" style="max-width: 230px;"><a class="link-primary" href="{% url 'instances:instance' instance.id %}">{{ instance.name }}</a></td>
                         <td>{{ snap.date|date:"M d H:i:s" }}</td>
                         <td><strong>{{ snap.name }}</strong></td>
                         <td>({% trans "Internal" %}) - {{ snap.description }}</td>

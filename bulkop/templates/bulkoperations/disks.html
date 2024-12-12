@@ -20,9 +20,9 @@
                 {% for disk in instance.disks %}
                     <tr>
                         <td><a class="link-primary" href="{% url 'overview' compute.id %}">{{ compute.name }}</a></td>
-                        <td><a class="link-primary" href="{% url 'instances:instance' instance.id %}">{{ instance.name }}</a></td>
+                        <td class="text-truncate" style="max-width: 230px;"><a class="link-primary" href="{% url 'instances:instance' instance.id %}">{{ instance.name }}</a></td>
                         {% if disk.storage is None %}
-                            <td colspan="4">
+                            <td colspan="3">
                                 <div class="alert alert-danger">
                                     {% trans "Error getting disk info" %}
                                 </div>

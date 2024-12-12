@@ -39,9 +39,9 @@
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link action-button" id="migrations-tab" aria-controls="migrations" data-bs-toggle="pill" data-bs-target="#migrations" type="button" role="tab" aria-selected="false">
-                    <span id="action-block" aria-hidden="true">{% bs_icon 'box-arrow-in-right' size='2em'%} </span>
-                    {% trans "Migration" %}
+                <button class="nav-link action-button" id="power-tab" aria-controls="powers" data-bs-toggle="pill" data-bs-target="#powers" type="button" role="tab" aria-selected="false">
+                    <span id="action-block" aria-hidden="true">{% bs_icon 'power' size='2em'%} </span>
+                    {% trans "Power" %}
                 </button>
             </li>
         </ul>
@@ -52,7 +52,7 @@
             {% include 'bulkoperations/instances.html' %}
             {% include 'bulkoperations/disks.html' %}
             {% include 'bulkoperations/snapshots.html' %}
-            {% include 'bulkoperations/migration.html' %}
+            {% include 'bulkoperations/power.html' %}
         </div>
     </div> 
     
@@ -65,14 +65,12 @@
         return new bootstrap.Popover(popoverTriggerEl)
         })
     });
-    // For selection in migration page
-    var migrationForm = document.getElementById('migrationForm');
+    // For selection in power page
+    var powerForm = document.getElementById('powerForm');
     var head = document.getElementsByClassName('head_checkbox');
     var body = document.getElementsByClassName('body_checkbox');
     var powerOnInstances = document.getElementById('powerOnInstances');
     var powerOffInstances = document.getElementById('powerOffInstances');
-    var migrateInstance = document.getElementById('migrateInstance');
-    var deleteInstance = document.getElementById('deleteInstance');
     var selectedInstances = 0;
     var activeInstances = 0;
     var inactiveInstances = 0;
@@ -110,26 +108,19 @@
             powerOnInstances.className = "btn btn-success"
             powerOffInstances.className = "btn btn-danger"
         }
-        if (selectedInstances > 0){
-            deleteInstance.className = "btn btn-danger"
-            migrateInstance.className = "btn btn-primary"
-        }else {
-            deleteInstance.className += " disabled"
-            migrateInstance.className += " disabled"
-        }
         if(activeInstances <= 0) powerOffInstances.className = "btn btn-secondary disabled";
         if(inactiveInstances <= 0) powerOnInstances.className = "btn btn-secondary disabled";
     }
     // end
     function bulkStart() {
         showPleaseWaitDialog()
-        migrationForm.action = "{% url 'bulkop:bulkStart' %}"
-        migrationForm.submit();
+        powerForm.action = "{% url 'bulkop:bulkStart' %}"
+        powerForm.submit();
     }
     function bulkForceOff() {
         showPleaseWaitDialog()
-        migrationForm.action = "{% url 'bulkop:bulkForceOff' %}"
-        migrationForm.submit();
+        powerForm.action = "{% url 'bulkop:bulkForceOff' %}"
+        powernForm.submit();
     }
 </script>
 <script src="/static/js/filter-table.js"></script>

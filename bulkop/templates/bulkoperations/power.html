@@ -1,14 +1,12 @@
 {% load i18n %}
 {% load bootstrap_icons %}
-<div class="tab-pane tab-pane-bordered" id="migrations" role="tabpanel">
-    <form action="" id="migrationForm" method="POST">{% csrf_token %}
-        <h3 class="page-header">{% trans "Migration" %}</h3>
+<div class="tab-pane tab-pane-bordered" id="powers" role="tabpanel">
+    <form action="" id="powerForm" method="POST">{% csrf_token %}
+        <h3 class="page-header">{% trans "Power" %}</h3>
         <table class="table table-hover sortable-theme-bootstrap" data-sortable>
         <div class="btn-group mb-2" style="float:right">
             <a id="powerOnInstances" class="btn btn-secondary disabled" title="{% trans "Start" %}" onclick="bulkStart()">{% bs_icon 'play'%}</a>
             <a id="powerOffInstances" class="btn btn-secondary disabled" title="{% trans "Stop" %}" onclick="bulkForceOff()">{% bs_icon 'stop'%}</a>
-            <a id="migrateInstance" class="btn btn-primary disabled" title="{% trans "Migrate" %}">{% bs_icon 'box-arrow-in-right'%}</a>
-            <a id="deleteInstance" class="btn btn-danger disabled" title="{% trans "Destroy" %}">{% bs_icon 'trash'%}</a>
         </div>
         
         <thead>

@@ -16,8 +16,8 @@
         {% if compute.status is True and compute.instance_set.count > 0 %}
             {% for instance in compute.instance_set.all %}
                 <tr>
-                    <td><a class="link-primary" href="{% url 'overview' compute.id %}">{{ compute.name }}</a></td>
-                    <td><a class="link-primary" href="{% url 'instances:instance' instance.id %}">{{ instance.name }}</a></td>
+                    <td class="text-truncate" style="max-width: 200px;"><a class="link-primary" href="{% url 'overview' compute.id %}">{{ compute.name }}</a></td>
+                    <td class="text-truncate" style="max-width: 400px;"><a class="link-primary" href="{% url 'instances:instance' instance.id %}">{{ instance.name }}</a></td>
                     {% if instance.status == 1 %}
                         {% if instance.guest_agent_ready %}
                         <td id="{{instance.id}}-os">{{instance.os_info.name}} - {{instance.os_info.version}}</td>

@@ -30,6 +30,7 @@ urlpatterns = [
     path("computes/", include("computes.urls")),
     path("console/", console, name="console"),
     path("datasource/", include("datasource.urls")),
+    path("failover/", include("failover.urls")),
     path("instances/", include("instances.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
     path("logs/", include("logs.urls")),

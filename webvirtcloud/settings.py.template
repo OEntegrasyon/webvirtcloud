@@ -8,6 +8,7 @@ import subprocess
 from django_auth_ldap.config import LDAPSearch, NestedActiveDirectoryGroupType
 from django.utils.translation import gettext_lazy as _
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     "computes",
     "console",
     "datasource",
+    "failover",
     "networks",
     "instances",
     "interfaces",
@@ -129,7 +131,10 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
-STATIC_ROOT = Path.joinpath(BASE_DIR, "static")
+if DEBUG:
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+else:
+    STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 
 BS_ICONS_CACHE = Path.joinpath(BASE_DIR, 'static/icon_cache')

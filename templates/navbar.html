@@ -27,6 +27,7 @@
           </a>
           <div class="dropdown-menu" aria-labelledby="administration">
             <a class="dropdown-item" href="{% url 'bulkop:bulkop' %}">{% bs_icon 'collection' %} {% trans "Bulk Operations" %}</a>
+            <a class="dropdown-item" href="{% url 'failover:failover' %}">{% bs_icon 'shield-check' %} {% trans "Failover" %}</a>
             <a class="dropdown-item {% view_active request 'admin:user_list' %}" href="{% url 'admin:user_list' %}">{% bs_icon 'person-plus' %} {% trans "Users" %}</a>
             <a class="dropdown-item {% view_active request 'admin:group_list' %}" href="{% url 'admin:group_list' %}">{% bs_icon 'people-fill' %} {% trans "Groups" %}</a>
             <a class="dropdown-item {% view_active request 'admin:logs' %}" href="{% url 'admin:logs' %}">{% bs_icon 'card-list' %} {% trans "Logs" %}</a>

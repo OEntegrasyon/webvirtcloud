@@ -12,59 +12,64 @@
                 </button>
             </li>
             {% endif %}
-            <li class="nav-item" role="presentation">
+            <li class="nav-item" role="presentation" style="font-size:14px">
                 <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#boot_opt" type="button" role="tab" aria-controls="boot_opt" aria-selected="true">
                     {% trans "Boot" %}
                 </button>
             </li>
-            <li class="nav-item" role="presentation">
+            <li class="nav-item" role="presentation" style="font-size:14px">
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#disks" type="button" role="tab" aria-controls="disks" aria-selected="false">
                     {% trans "Disk" %}
                 </button>
             </li>
         {% endif %}
         {% if request.user.is_superuser or request.user.is_staff or userinstance.is_vnc %}
-            <li class="nav-item" role="presentation">
+            <li class="nav-item" role="presentation" style="font-size:14px">
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vncsettings" type="button" role="tab" aria-controls="vncsettings" aria-selected="false">
                     {% trans "Console" %}
                 </button>
             </li>
         {% endif %}
         {% if request.user.is_superuser %}
-            <li class="nav-item" role="presentation">
+            <li class="nav-item" role="presentation" style="font-size:14px">
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#network" type="button" role="tab" aria-controls="network" aria-selected="false">
                     {% trans "Network" %}
                 </button>
             </li>
         {% endif %}
         {% if perms.instances.clone_instances %}
-            <li class="nav-item" role="presentation">
+            <li class="nav-item" role="presentation" style="font-size:14px">
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#clone" type="button" role="tab" aria-controls="clone" aria-selected="false">
                     {% trans "Clone" %}
                 </button>
             </li>
         {% endif %}
         {% if request.user.is_superuser %}
-            <li class="nav-item" role="presentation">
+            <li class="nav-item" role="presentation" style="font-size:14px">
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#migrate" type="button" role="tab" aria-controls="migrate" aria-selected="false">
                     {% trans "Migrate" %}
                 </button>
             </li>
-            <li class="nav-item" role="presentation">
+            <li class="nav-item" role="presentation" style="font-size:14px">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#failover" type="button" role="tab" aria-controls="failover" aria-selected="false">
+                    {% trans "Failover" %}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation" style="font-size:14px">
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#xmledit" type="button" role="tab" aria-controls="xmledit" aria-selected="false">
                     {% trans "XML" %}
                 </button>
             </li>
         {% endif %}
         {% if perms.instances.clone_instances %}
-            <li class="nav-item" role="presentation">
+            <li class="nav-item" role="presentation" style="font-size:14px">
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#options" type="button" role="tab" aria-controls="options" aria-selected="false">
                     {% trans "Options" %}
                 </button>
             </li>
         {% endif %}
         {% if request.user.is_superuser %}
-            <li class="nav-item" role="presentation">
+            <li class="nav-item" role="presentation" style="font-size:14px">
                 <button class="px-1 nav-link" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab" aria-controls="users" aria-selected="false">
                     {% trans "Users" %}
                 </button>
@@ -657,6 +662,112 @@
                     <button class="btn btn-lg btn-success float-end disabled">{% trans "Migrate" %}</button>
                 {% endif %}
             </form>
+            <div class="clearfix"></div>
+        </div>
+        <div role="tabpanel" class="tab-pane tab-pane-bordered" id="failover">
+            {% if failover %}
+                <form action="{% url 'failover:delete' instance.id %}" class="ms-3 form" method="post" role="form" aria-label="Failover Remove">
+                    {% csrf_token %}
+                    <table class="table table-hover" style="cursor:pointer">
+                        <thead>
+                            <tr>
+                                <th scope="col">{% trans "Parameter" %}</th>
+                                <th scope="col">{% trans "Value" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="col-4">{% trans "Host" %}
+                                <td class="col-8">{{ instance.compute.name }}</td>
+                            </tr>
+                            <tr>
+                                <td class="col-4">{% trans "Failover Host" %}
+                                <td class="col-8">{{ failover.failover_host }}</td>
+                            </tr>
+                            <tr>
+                                <td class="col-4">{% trans "Failover Instance" %}
+                                {% if failover.failover_instance %}
+                                    <td class="col-8"><a class="link-primary" href="{% url 'instances:instance' failover.failover_instance.id %}">{{ failover.failover_instance.name }}</a></td>
+                                {% else %}
+                                    <td class="col-8">{{ failover.failover_instance }}</td>
+                                {% endif %}
+                                </tr>
+                            <tr>
+                                <td class="col-4">{% trans 'Status' %}</td>
+                                {% if failover.status == "Ready" %}
+                                    <td class="col-8 text-success">{% trans 'Ready' %}</td>
+                                {% elif failover.status == "Activated"%}
+                                    <td class="col-8 text-danger">{% trans 'Activated' %}</td>
+                                {% endif %}
+                            </tr>
+                            <tr>
+                                <td class="col-4">{% trans "Failover Method" %}</td>
+                                {% if failover.failover_method == 1%}
+                                    <td class="col-8">{% trans "Virtual Machine Replication" %}</td>
+                                {% elif failover.failover_method == 2%}
+                                    <td class="col-8">{% trans "Disk Replication" %}</td>
+                                {% elif failover.failover_method == 3%}
+                                    <td class="col-8">{% trans "Storage Based" %}</td>
+                                {% endif %}
+                            </tr>
+                            <tr>
+                                <td class="col-4">{% trans "Service Ports" %}</td>
+                                <td class="col-8">{{ failover.service_ports }}</td>
+                            </tr>
+                            
+                        </tbody>
+                    </table>
+                    {% if failover.failover_method == 1 %}
+                        <h4>{% trans "Migration Configuration" %}</h4>
+                        <table class="table table-hover" style="cursor:pointer">
+                            <tbody>
+                                {% for migration_parameter,migration_value in failover.migration_conf.items %}
+                                    <tr>
+                                        <td class="col-4">{{ migration_parameter }}</td>
+                                        <td class="col-8">{{ migration_value }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% elif failover.failover_method == 2 %}
+                        <h4>{% trans "DRBD Configuration" %}</h4>
+                        <table class="table table-hover" style="cursor:pointer">
+                            <tbody>
+                                {% for drbd_parameter,drbd_value in failover.drbd_conf.items %}
+                                    <tr>
+                                        <td class="col-4">{{ drbd_parameter }}</td>
+                                        <td class="col-8">{{ drbd_value }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% elif failover.failover_method == 3 %}
+                        <h4>{% trans "Storage Configuration" %}</h4>
+                        <table class="table table-hover" style="cursor:pointer">
+                            <tbody>
+                                {% for storage_parameter,storage_value in failover.storage_conf.items %}
+                                    <tr>
+                                        <td class="col-4">{{ storage_parameter }}</td>
+                                        <td class="col-8">{{ storage_value }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+
+                            
+                    <button class="btn btn-lg btn-danger float-end">{% trans "Remove Failover" %}</button>
+                </form>
+            {% elif failover_secondary %}
+                <p>{% trans "This instance is a secondary for " %} <strong>{{ failover_secondary.instance.name }}</strong></p>
+                <a class="btn btn-lg btn-success float-end" href="{% url 'instances:instance' failover_secondary.instance.id %}">{% trans "Go To Primary Instance" %}</a>
+            {% else %}
+                <p>{% trans "For setting up a Failover Recovery System for this VM Instance." %}</p>
+                <form action="{% url 'failover:setup' instance.id %}" class="ms-3 form" method="post" role="form" aria-label="Failover Setup Form">
+                    {% csrf_token %}
+                        <button type="submit" class="btn btn-lg btn-success float-end" name="setup-failover" >{% trans "Setup Failover" %}</button>
+                </form>
+            {% endif %}
             <div class="clearfix"></div>
         </div>
         <div role="tabpanel" class="tab-pane tab-pane-bordered" id="xmledit">

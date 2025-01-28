@@ -33,6 +33,7 @@ from vrtManager.storage import wvmStorage
 from vrtManager.util import randomPasswd
 
 from instances.models import Instance
+from failover.models import Failover
 
 from . import utils
 from .forms import ConsoleForm, FlavorForm, NewVMForm
@@ -66,6 +67,8 @@ def index(request):
 def instance(request, pk):
     instance: Instance = get_instance(request.user, pk)
     compute: Compute = instance.compute
+    failover: Failover = Failover.objects.filter(instance=instance).first()
+    failover_secondary: Failover = Failover.objects.filter(failover_instance=instance).first()
     computes = Compute.objects.all().order_by("name")
     computes_count = computes.count()
     users = User.objects.all().order_by("username")

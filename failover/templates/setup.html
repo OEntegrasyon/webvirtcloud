@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+{% load bootstrap_icons %}
+
+{% block title %}{% trans "Setup Failover" %}{% endblock %}
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/sortable-theme-bootstrap.css' %}" />
+{% endblock %}
+{% block page_heading %}
+    {% trans "Setup Failover" %}
+{% endblock page_heading %}
+
+
+{% block content %}
+
+<div>
+    <table class="table table-hover" style="cursor:pointer">
+        <thead>
+            <tr>
+                <th><strong>{% trans "Host" %}</strong></th>
+                <th><strong>{% trans "Instance" %}</strong></th>
+                <th><strong>{% trans "Status" %}</strong></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ instance.compute.name }}</td>
+                <td>{{ instance.name }}</td>
+                <td>{% trans vmstatus %}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <form action="{% url 'failover:configure' instance.id %}" class="form" method="post" role="form">
+        {% csrf_token %}
+        <div class="row mb-2">
+            <label class="col-3 align-content-center" >{% trans "Failover Host" %}</label>
+            <div class="col-9">
+                <select name="compute-selection" class="form-select">
+                    {% for compute in computes %}
+                        <option value={{compute.id}}>{{compute}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <label class="col-3 align-content-center" >{% trans "Failover Method" %}</label>
+            <div class="col-9">
+                <select name="failover-selection" class="form-select">
+                    <option value="0">{% trans "Select a Failover Method" %}</option>
+                    <option value="1">{% trans "Virtual Machine Replication" %}</option>
+                    <option disabled value="2">{% trans "Disk Replication" %}</option>
+                    <option value="3">{% trans "Storage Based" %}</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <label class="col-3 align-content-center" >{% trans "Bi-Directional Failover" %}</label>
+            <div class="col-9">
+                <select name="bidirectional-failover-selection" class="form-select">
+                    <option value="False" selected>{% trans "False" %}</option>
+                    <option value="True">{% trans "True" %}</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="input-group mb-2">
+            <span class="input-group-text col-3" id="service-ports-label">{% trans "Service Ports" %}</span>
+            <input name="service-ports" type="text" class="form-control" placeholder="80, 8080, 3000" aria-label="Service Ports" aria-describedby="service-ports-label">
+        </div>
+
+        {% include "_replication_setup.html" %}
+        {% include "_drbd_setup.html" %}
+        {% include "_storage_setup.html" %}
+
+        <div style="text-align:end">
+            <button class="btn btn-success">{% trans "Setup Failover" %}</button>
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock content %}
+{% block script %}
+<script>
+
+let method_selection = document.getElementsByName("failover-selection")[0]
+let compute_selection = document.getElementsByName("compute-selection")[0]
+var setup_pages = document.getElementsByName("setup-page")
+
+function update_drbd_info() {
+    if (method_selection.value == 0){
+        return
+    }
+    Array.from(setup_pages).forEach(element => {
+        element.style.display = "none"
+    })
+    let selected_page = document.getElementById(method_selection.value)
+    if (selected_page) {
+        selected_page.style.display = "block"
+    }
+    if (method_selection.value == 2){
+        let host_badge = document.getElementById("host-compute-status")
+        let dest_badge = document.getElementById("dest-compute-status")
+        
+        host_badge.innerText = "..."
+        dest_badge.innerText = "..."
+
+        fetch('/failover/drbd_info/{{ instance.id }}/?compute='+compute_selection.value, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            host_badge.innerText = data['host_compute'][1]
+            dest_badge.innerText = data['dest_compute'][1]
+
+            host_badge.className = data['host_compute'][0] === 'success' 
+                ? "badge bg-success" 
+                : "badge bg-danger";
+
+            dest_badge.className = data['dest_compute'][0] === 'success' 
+                ? "badge bg-success" 
+                : "badge bg-danger";
+        })
+    }
+}
+
+method_selection.onchange = update_drbd_info
+compute_selection.onchange = update_drbd_info
+
+
+</script>
+
+<script src="/static/js/filter-table.js"></script>
+{% endblock script %}

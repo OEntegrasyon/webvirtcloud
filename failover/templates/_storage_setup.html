@@ -1,0 +1,14 @@
+{% load i18n %}
+{% load static %}
+{% load bootstrap_icons %}
+
+<div name="setup-page" id="3" style="display:none">
+    <div class="input-group mb-2">
+        <span class="input-group-text col-3" id="storage-ip-label">{% trans "Storage Address" %}</span>
+        <input name="storage-ip" type="text" class="form-control" placeholder="192.168.1.100" aria-label="Storage Address" aria-describedby="storage-ip-label">
+    </div>
+    <div class="input-group mb-2">
+        <span class="input-group-text col-3" id="storage-path-label">{% trans "Storage Path" %}</span>
+        <input name="storage-path" type="text" class="form-control" placeholder="/storage/" aria-label="Storage Path" aria-describedby="storage-path-label">
+    </div>
+</div>

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+{% load bootstrap_icons %}
+
+{% block title %}{% trans "Failover" %}{% endblock %}
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/sortable-theme-bootstrap.css' %}" />
+{% endblock %}
+{% block page_heading %}
+    {% trans "Failover" %}
+    <a href="#" class="link-primary" onclick="location.reload(true)" title={% trans "Refresh" %}>
+        {% bs_icon 'repeat'%}
+    </a>
+{% endblock page_heading %}
+
+
+{% block content %}
+
+<div class="tab-pane tab-pane-bordered active" id="instances" role="tabpanel">
+    <h3 class="page-header">{% trans "Instances" %}</h3>
+    <table class="table table-hover sortable-theme-bootstrap" data-sortable>
+    <thead>
+        <tr>
+            <th scope="col">{% trans "Compute" %}</th>
+            <th scope="col">{% trans "Name" %}</th>
+            <th scope="col">{% trans "Failover" %}</th>
+        </tr>
+    </thead>
+    <tbody class="searchable">
+    {% for instance in instances %}
+        <tr>
+            <td class="text-truncate" style="max-width: 200px;"><a class="link-primary" href="{% url 'overview' instance.compute.id %}">{{ instance.compute.name }}</a></td>
+            <td class="text-truncate" style="max-width: 400px;"><a class="link-primary" href="{% url 'instances:instance' instance.id %}">{{ instance.name }}</a></td>
+            {% if instance in failovers.primary %}
+                <td><a class="btn btn-danger" href="{% url 'failover:delete' instance.id %}">{% trans "Remove Failover" %}</a></td>
+            {% elif instance in failovers.secondary %}
+                <td><a class="btn btn-secondary disabled" href="#">{% trans "Failover Instance" %}</a></td>
+            {% else %}
+                <td><a class="btn btn-success" href="{% url 'failover:setup' instance.id %}">{% trans "Setup Failover" %}</a></td>
+            {% endif %}
+        </tr>
+    </tbody>
+    {% endfor %}
+    </table>
+</div>
+
+{% endblock content %}
+{% block script %}
+
+<script src="/static/js/filter-table.js"></script>
+{% endblock script %}

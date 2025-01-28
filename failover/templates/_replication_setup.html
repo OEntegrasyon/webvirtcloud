@@ -1,0 +1,18 @@
+{% load i18n %}
+{% load static %}
+{% load bootstrap_icons %}
+
+
+<div name="setup-page" id="1" style="display:none">
+    <div class="row mb-2 mt-2">
+        <label class="col-3 align-content-center" >{% trans "Migration Interval" %}</label>
+        <div class="col-9">
+            <select name="migration-interval-selection" class="form-select mb-2">
+                <option value="30">30 {% trans "seconds" %}</option>
+                <option value="60">1 {% trans "minute" %}</option>
+                <option value="90">1.5 {% trans "minutes" %}</option>
+                <option value="120">2 {% trans "minutes" %}</option>
+            </select>
+        </div>
+    </div>
+</div>

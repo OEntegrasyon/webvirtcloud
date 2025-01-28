@@ -1,0 +1,93 @@
+{% load i18n %}
+{% load static %}
+{% load bootstrap_icons %}
+
+<div name="setup-page" id="2" style="display:none">
+    <div class="input-group mb-2">
+        <span class="input-group-text col-3" id="resource-name-label">{% trans "Resource Name" %}</span>
+        <input name="resource-name" type="text" class="form-control" placeholder="kvm_disk_replication" aria-label="Resource Name" aria-describedby="resource-name-label">
+    </div>
+        <span class="badge bg-info">{% trans "Host 1 DRBD Version : " %}</span>
+        <span class="badge bg-danger" id="host-compute-status">Error</span>
+        <br/>
+        <span class="badge bg-info">{% trans "Host 2 DRBD Version : " %}</span>
+        <span class="badge bg-danger" id="dest-compute-status">Error</span>
+        <br/>
+
+    <div class="row mb-2 mt-2">
+        <label class="col-3 align-content-center" >{% trans "Protocol" %}</label>
+        <div class="col-9">
+            <select name="protocol-selection" class="form-select mb-2">
+                <option value="A">A: {% trans "Asynchronous" %}</option>
+                <option value="B">B: {% trans "Memory Synchronous" %}</option>
+                <option selected value="C">C: {% trans "Fully Synchronous" %}</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="input-group mb-2">
+        <span class="input-group-text col-3" id="primary-device-label">{% trans "Primary Device" %}</span>
+        <input name="primary-device" type="text" class="form-control" placeholder="/dev/drbd0" aria-label="Primary Device" aria-describedby="primary-device-label">
+    </div>
+
+    <div class="input-group mb-2">
+        <span class="input-group-text col-3" id="primary-disk-label">{% trans "Primary Disk" %}</span>
+        <input name="primary-disk" type="text" class="form-control" placeholder="/dev/sdb" aria-label="Primary Disk" aria-describedby="primary-disk-label">
+    </div>
+
+    <div class="row mb-2">
+        <label class="col-3 align-content-center" >{% trans "Primary Metadata" %}</label>
+        <div class="col-9">
+            <select name="primary-metadata-location" class="form-select mb-2">
+                <option value="internal">{% trans "Internal" %}</option>
+                <option value="external">{% trans "External" %}</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="input-group mb-2">
+        <span class="input-group-text col-3" id="secondary-device-label">{% trans "Secondary Device" %}</span>
+        <input name="secondary-device" type="text" class="form-control" placeholder="/dev/drbd0" aria-label="Secondary Device" aria-describedby="secondary-device-label">
+    </div>
+
+    <div class="input-group mb-2">
+        <span class="input-group-text col-3" id="secondary-disk-label">{% trans "Secondary Disk" %}</span>
+        <input name="secondary-disk" type="text" class="form-control" placeholder="/dev/sdb" aria-label="Secondary Disk" aria-describedby="secondary-disk-label">
+    </div>
+
+    <div class="row mb-2">
+        <label class="col-3 align-content-center" >{% trans "Secondary Metadata" %}</label>
+        <div class="col-9">
+            <select name="secondary-metadata-location" class="form-select mb-2">
+                <option value="internal">{% trans "Internal" %}</option>
+                <option value="external">{% trans "External" %}</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <label class="col-3 align-content-center" >{% trans "Allow Two Primaries" %}</label>
+        <div class="col-9">
+            <select name="allow-two-primaries" class="form-select mb-2">
+                <option value="no">{% trans "No" %}</option>
+                <option value="yes">{% trans "Yes" %}</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <label class="col-3 align-content-center" >{% trans "Sync Rate Limit" %}</label>
+        <div class="col-9">
+            <select name="sync-rate" class="form-select mb-2">
+                <option value="10M">{% trans "10MB/s" %}</option>
+                <option value="100M">{% trans "100MB/s" %}</option>
+                <option value="1000M">{% trans "1GB/s" %}</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="input-group mb-2">
+        <span class="input-group-text col-3" id="al-extents-label">{% trans "Write-Ahead Log Size" %}</span>
+        <input name="al-extents" type="number" class="form-control" placeholder="100" aria-label="Write-Ahead Log Size" aria-describedby="al-extents-label">
+    </div>
+</div>

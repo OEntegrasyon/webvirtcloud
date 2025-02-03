@@ -173,9 +173,21 @@ def migration_process(failover_object, first_time=False):
         ins.create_external_snapshot('snap_for_mig')
 
     else:
-        ins.create_external_snapshot('temp_snap_for_mig')
-        file_paths = [disk_device.get('path') if disk_device.get('image').split('.')[-1] == 'snap_for_mig' else None for disk_device in ins.get_disk_devices()]
-        
+        snap_extension = None
+        file_paths = []
+        for disk_device in ins.get_disk_devices():
+            splitted_name = disk_device.get('image').split('.')
+            disk_name = splitted_name[-1] if len(splitted_name) > 0 else None
+            if disk_name == 'snap_for_mig' or disk_name == 'temp_snap_for_mig':
+                file_paths.append(disk_device.get('path'))
+
+        if len(file_paths) > 0:
+            snap_extension = file_paths[0].split('.')[-1]
+            if snap_extension == 'snap_for_mig':
+                ins.create_external_snapshot('temp_snap_for_mig')
+            else:
+                ins.create_external_snapshot('snap_for_mig')
+
         for file_path in file_paths:
             send_file_to_remote_from_remote(failover_object.instance.compute, failover_object.failover_host, file_path, file_path)
             execute_command_with_ssh(f"chown libvirt-qemu:kvm {file_path}", failover_object.failover_host)
@@ -183,15 +195,13 @@ def migration_process(failover_object, first_time=False):
         ins2 = failover_object.failover_instance.proxy
         dom2 = ins2.instance
 
-        temp_snap_obj = dom.snapshotLookupByName('temp_snap_for_mig')
-        snap_obj_1 = dom.snapshotLookupByName('snap_for_mig')
+        snap_obj_1 = dom.snapshotLookupByName(snap_extension)
         snap_xml = snap_obj_1.getXMLDesc()
         snap_obj_2 = dom2.snapshotCreateXML(snap_xml, 48) # VIR_DOMAIN_SNAPSHOT_CREATE_DISK_ONLY | VIR_DOMAIN_SNAPSHOT_CREATE_REUSE_EXT
 
         snap_obj_2.delete(0)
-        temp_snap_obj.delete(0)
         snap_obj_1.delete(0)
-        ins.create_external_snapshot('snap_for_mig')
+        ins.create_external_snapshot(snap_extension)
 
     failover_object.update_xml()
 

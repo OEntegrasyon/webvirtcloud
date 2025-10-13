@@ -181,6 +181,7 @@ configure_nginx () {
 configure_supervisor () {
   # Copy template supervisor service for gunicorn and novnc
   echo "  * Copying supervisor configuration"
+  mkdir -p "$supervisor_conf_path" > /dev/null 2>&1
   cp "$APP_PATH"/conf/supervisor/webvirtcloud.conf "$supervisor_conf_path"/"$supervisor_file_name"
   nginx_group_escape="$(echo -n "$nginx_group"|sed -e 's/[](){}<>=:\!\?\+\|\/\&$*.^[]/\\&/g')"
   sed -i "s|^\\(user=\\).*|\\1$nginx_group_escape|" "$supervisor_conf_path/$supervisor_file_name"
@@ -208,8 +209,40 @@ run_as_app_user () {
   fi
 }
 
+check_python () {
+  # check if python3 is installed.
+  if ! hash "$PYTHON" 2>/dev/null; then
+    echo "Python3 is not installed. Please install Python3 and try again."
+    exit 1
+  fi
+
+  # check if python3 version is grater than 3.10 amd set it as default
+  if ! "$PYTHON" -c 'import sys; assert sys.version_info >= (3, 10)' >/dev/null 2>&1; then
+    echo "Your Python version is less than 3.10. This script requires Python 3.10 or greater."
+    echo "Please install Python 3.10 or greater and set it as the default version."
+    echo "Use update-alternatives command to set default python version to latest."
+    echo "For example: sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1"
+    echo "Then run this script again."
+    echo "Do not forget to install pip3 and python3-devel for python3.10 or later."
+    exit 1
+  fi
+
+  # check if pip3 is installed
+  if ! hash pip3 2>/dev/null; then
+    echo "pip3 is not installed. Please install pip3 and try again."
+    exit 1
+  fi
+}
+
 activate_python_environment () {
     cd "$APP_PATH" || exit
+    # Check if virtualenv is installed
+    if ! "$PYTHON" -c 'import virtualenv' >/dev/null 2>&1; then
+      echo "Virtualenv is not installed. Please install virtualenv and try again."
+      exit 1
+    fi
+    # Create a virtual environment
+    echo "* Creating virtual environment in $APP_PATH/venv"
     virtualenv -p "$PYTHON" venv
     # shellcheck disable=SC1091
     source venv/bin/activate
@@ -253,6 +286,9 @@ install_webvirtcloud () {
     host_ip+="'http://$i', " 
   done
   sed -i "s|^\\(CSRF_TRUSTED_ORIGINS = \\).*|\\1\[ \'http://$fqdn\', $host_ip ]|" /srv/webvirtcloud/webvirtcloud/settings.py
+
+  echo "* Checking up Python3 version."
+  check_python
 
   echo "* Activate virtual environment."
   activate_python_environment
@@ -308,19 +344,19 @@ set_hosts () {
 }
 
 restart_supervisor () {
-    echo "* Setting Supervisor to start on boot and restart."
-    log "systemctl enable $supervisor_service"
-    #systemctl enable $supervisor_service
-    log "systemctl restart $supervisor_service"
-    #systemctl restart $supervisor_service
+  echo "* Setting Supervisor to start on boot and restart."
+  log "systemctl enable $supervisor_service"
+  #systemctl enable $supervisor_service
+  log "systemctl restart $supervisor_service"
+  #systemctl restart $supervisor_service
 }
 
 restart_nginx () {
-    echo "* Setting Nginx to start on boot and starting Nginx."
-    log "systemctl enable nginx.service"
-    #systemctl enable nginx.service
-    log "systemctl restart nginx.service"
-    #systemctl restart nginx.service
+  echo "* Setting Nginx to start on boot and starting Nginx."
+  log "systemctl enable nginx.service"
+  #systemctl enable nginx.service
+  log "systemctl restart nginx.service"
+  #systemctl restart nginx.service
 }
 
 
@@ -350,7 +386,7 @@ echo '
 '
 
 echo "" 
-echo "  Welcome to Webvirtcloud Installer for RHEL&Alternatives, Fedora, Debian and Ubuntu!"
+echo "  Welcome to Webvirtcloud Installer for RHEL Based OSes, Debian and Ubuntu!"
 echo ""
 shopt -s nocasematch
 case $distro in
@@ -475,7 +511,7 @@ echo "========="
 case $distro in
   debian)
   if [[ "$version" -ge 9 ]]; then
-    # Install for Debian 9.x / 10.x
+    # Install for Debian 9.x / 10.x / 12.x
     tzone=\'$(cat /etc/timezone)\'
 
     echo -n "* Updating installed packages."
@@ -503,7 +539,7 @@ case $distro in
   fi
   ;;
   ubuntu)
- if [ "$version" == "18.04" ] || [ "$version" == "20.04" ]; then
+  if [ "$version" == "18.04" ] || [ "$version" == "20.04" ] || [ "$version" == "22.04" ]; then
     # Install for Ubuntu 18 / 20
     tzone=\'$(cat /etc/timezone)\'
 
@@ -532,12 +568,20 @@ case $distro in
   fi  
   ;;
   centos)
-  if [[ "$version" =~ ^8 ]] || [[ "$version" =~ ^9  ]]; then
-    # Install for CentOS/Redhat 8
+  if [[ "$version" =~ ^10  ]]; then
+    # Install for CentOS/Redhat 10
     tzone=\'$(timedatectl|grep "Time zone"| awk '{print $3}')\'
 
-    echo "* Adding wget & epel-release repository."
-    log "yum -y install wget epel-release"
+    if command -v "crb" >/dev/null 2>&1; then
+      echo "* CRB Repo is found, enabling it."
+      log "crb enable > /dev/null 2>&1"
+    else
+      echo "* Enabling CRB repository."
+      log "dnf config-manager --set-enabled crb"
+    fi
+
+    echo "* Adding wget & epel-release & supervisor repository."
+    log "yum -y install wget epel-release supervisor"
 
     echo "* Installing OS requirements."
     PACKAGES="git python3-virtualenv python3-devel libvirt-devel glibc gcc nginx python3-lxml python3-libguestfs iproute-tc cyrus-sasl-md5 openldap-devel"
@@ -545,13 +589,15 @@ case $distro in
 
     set_hosts
 
+    echo "* Configuring virtualenv."
+    log "pip3 install virtualenv"
     install_webvirtcloud
 
     echo "* Configuring Nginx."
     configure_nginx
 
     echo "* Configuring Supervisor."
-    log "pip install supervisor "
+    log "pip3 install supervisor "
     configure_supervisor
     
     set_firewall 
@@ -561,9 +607,8 @@ case $distro in
     restart_supervisor
     restart_nginx
     
-
   else
-    echo "Unsupported CentOS version. Version found: $version"
+    echo "Unsupported RHEL Based OS($distro) version. Version found: $version"
     exit 1
   fi
   ;;

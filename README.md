@@ -1,7 +1,7 @@
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/retspen/webvirtcloud)
 
 # WebVirtCloud
-###### Python 3.x & Django 4.2 LTS
+###### Python >=3.11 & Django 4.2 LTS
 
 ## Features
 * QEMU/KVM Hypervisor Management
@@ -32,7 +32,7 @@ WebVirtCloud is a virtualization web interface for admins and users. It can dele
 
 ## Quick Install with Installer (Beta)
 
-Install an OS and run specified commands. Installer supported OSes: Ubuntu 18.04/20.04, Debian 10/11, Centos/OEL/RHEL 8.
+Install an OS and run specified commands. Installer supported OSes: Ubuntu 20.04/22.04, Debian 10/11, Rocky/Alma/OEL/RHEL 10.
 It can be installed on a virtual machine, physical host or on a KVM host.
 
 ```bash
@@ -94,7 +94,7 @@ Done!!
 
 Go to http://serverip and you should see the login screen.
 
-### Install WebVirtCloud panel (CentOS8/OEL8)
+### Install WebVirtCloud panel (RHEL Based OS 8/9/10)
 
 ```bash
 sudo yum -y install epel-release
@@ -123,7 +123,7 @@ python3 manage.py migrate
 python3 manage.py collectstatic --noinput
 ```
 
-#### Configure the supervisor for CentOS
+#### Configure the supervisor for RHEL Based OS
 
 Add the following after the [include] line (after **files = ...** actually):
 ```bash

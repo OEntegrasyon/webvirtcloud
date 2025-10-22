@@ -27,7 +27,6 @@ documents = [
 ]
 
 def encode_texts(texts):
-    """Encode a list of texts into normalized embeddings."""
     encoded_input = tokenizer(
         texts,
         padding=True,

@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "logs",
     "qr_code",
     "rest_framework",
+    "chatbot",
 ]
 
 MIDDLEWARE = [

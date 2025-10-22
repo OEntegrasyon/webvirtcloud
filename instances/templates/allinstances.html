@@ -29,11 +29,28 @@
         {% else %}
             {% include 'allinstances_index_nongrouped.html' %}
         {% endif %}
+        
+        <button id="chat-toggle-btn">💬</button>
+
+        <!-- Chat Window -->
+        <div id="chat-widget" style="display: none;">
+        <div id="chat-header">
+            <p style="font-size: 15px;">Questions? Chat with ZekAI</p>
+            <p class="online-status">Typically replies within a few seconds.</p>
+        </div>
+        <div id="chat-body"></div>
+        <div id="chat-footer">
+            <input type="text" id="chat-input" placeholder="Type a message..." />
+            <button id="send-btn" title="Send message"><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="icon"><path d="M8.99992 16V6.41407L5.70696 9.70704C5.31643 10.0976 4.68342 10.0976 4.29289 9.70704C3.90237 9.31652 3.90237 8.6835 4.29289 8.29298L9.29289 3.29298L9.36907 3.22462C9.76184 2.90427 10.3408 2.92686 10.707 3.29298L15.707 8.29298L15.7753 8.36915C16.0957 8.76192 16.0731 9.34092 15.707 9.70704C15.3408 10.0732 14.7618 10.0958 14.3691 9.7754L14.2929 9.70704L10.9999 6.41407V16C10.9999 16.5523 10.5522 17 9.99992 17C9.44764 17 8.99992 16.5523 8.99992 16Z"></path></svg></button>
+        </div>
+        </div>
+        
     </div>
 {% endblock content %}
 {% block script %}
     <script src="{% static 'js/sortable.min.js' %}"></script>
     <script src="{% static 'js/filter-table.js' %}"></script>
+    <script src="{% static 'js/chatbot.js' %}"></script>
     {% if request.user.is_superuser %}
         <script>
             function goto_compute(compute) {
@@ -42,4 +59,117 @@
             }
         </script>
     {% endif %}
+    <script>
+
+        const chatBtn = document.getElementById('chat-toggle-btn');
+        const chatWidget = document.getElementById('chat-widget');
+        const chatBody = document.getElementById('chat-body');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        // Toggle chat window
+        chatBtn.addEventListener('click', () => {
+            if (chatBody.children.length===0) {
+                typeResponse("Hello! I am ZekAI. How can I assist you today?", "first");
+            }
+            chatWidget.style.display = chatWidget.style.display === 'none' ? 'flex' : 'none';
+            chatInput.focus();
+        });
+
+        function typeResponse(output, output_type) {
+            
+            const typing = document.createElement('div');
+            typing.className = 'message bot typing-indicator';
+            typing.innerHTML = `
+                        <div class="icon">Z</div>
+                        <div style="max-width: calc(100% - 40px);">
+                            <div class="name">ZekAI</div>
+                            <div class="dots"></div>
+                        </div>`;
+            chatBody.appendChild(typing);
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            if (output_type === "first") {
+                
+                typing.remove(); 
+
+                const botMessage = document.createElement('div');
+                botMessage.className = 'message bot';
+                botMessage.innerHTML = `
+                    <div class="icon">Z</div>
+                    <div style="max-width: calc(100% - 40px);">
+                        <div class="name">ZekAI</div>
+                        <div class="text">`+output+`</div>
+                    </div>`;
+                chatBody.appendChild(botMessage);
+                chatBody.scrollTop = chatBody.scrollHeight;
+                
+            }else {
+                all_response = "";
+                const botMessage = document.createElement('div');
+                botMessage.className = 'message bot';
+                chatBody.appendChild(botMessage);
+                var is_bold = false;
+                const evtSource = new EventSource("/chatbot/stream_chat?prompt="+output);
+                evtSource.onmessage = function(event) {
+
+                    if (event.data.includes("[DONE]")) { 
+                        evtSource.close(); 
+                        chatInput.disabled = false;
+                        chatInput.focus();
+                    }else {
+                        typing.remove();
+                        message = JSON.parse(event.data);
+                        dt = message.message.content;
+                        if (dt.indexOf("`") !== -1) {
+                            if (is_bold) {
+                                dt = dt.replace(/`/g, "</b>");
+                            }else {
+                                dt = dt.replace(/`/g, "<b>");
+                            }
+                            is_bold=!is_bold;
+                        }
+                        all_response += dt;
+                        console.log(dt);
+                        botMessage.innerHTML = `
+                            <div class="icon">Z</div>
+                            <div style="max-width: calc(100% - 40px);">
+                                <div class="name">ZekAI</div>
+                                <div class="text">`+all_response+`</div>
+                            </div>`;
+                        chatBody.scrollTop = chatBody.scrollHeight;
+
+                    }
+                
+                };
+            }
+        }
+
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message === '') return;
+
+            // User message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.innerHTML = `<div class="text">${message}</div>`;
+            chatBody.appendChild(userMessage);
+            chatInput.value = '';
+
+            chatInput.disabled = true;
+            //send message
+            typeResponse(message, "");
+        }
+
+        // Send message on Enter
+        chatInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter' && this.value.trim() !== '') {
+            sendMessage();
+        }
+        });
+
+        // Send message with button
+        sendBtn.addEventListener('click', sendMessage);
+
+    </script>
 {% endblock script %}

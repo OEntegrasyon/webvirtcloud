@@ -28,6 +28,7 @@ urlpatterns = [
     path("appsettings/", appsettings, name="appsettings"),
     path("bulkop/", include("bulkop.urls")),
     path("computes/", include("computes.urls")),
+    path("chatbot/", include("chatbot.urls")),
     path("console/", console, name="console"),
     path("datasource/", include("datasource.urls")),
     path("failover/", include("failover.urls")),

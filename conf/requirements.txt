@@ -26,3 +26,5 @@ websockify==0.13.0
 whitenoise==6.9.0
 zipp==3.23.0
 crypt-r==3.13.1
+sentence-transformers==4.1.0
+faiss-cpu==1.11.0
